@@ -31,8 +31,9 @@ def start_spider(song_id):
         'encSecKey': 'cdd62a540032ad317085f08c010d0e363ab1db5048bb92defaf34a8550f1c7e22950ec0fd45b2d097b685d09a25426456e0269954846ee663fdf2ab4619ca422addae51111274514c309a9d40c6b40af8c5972d38a4c6d52c0383695917ef00a89390a80fa1a96ab329cef9437df98df88b40796b110887598803c1738edbfea'
     }
 
+    # 使用 requests 发起 HTTP 请求
     response = requests.post(url, headers=headers, data=formdata)
-    print('请求 [ ' + url + ' ]，状态码为 ')
+    print('\n\n请求 [ ' + url + ' ]，状态码为 ')
     print(response.status_code)
     #
     # get_hot_comments(response.text)
@@ -59,10 +60,13 @@ def get_hot_comments(response):
 
 
 def write_to_file(data_list):
+    """
+    将数据保存到 CSV 文件中
+    """
     print('开始将数据持久化...')
     file_name = '网易云音乐精彩评论.CSV'
 
-    with codecs.open(file_name, 'a+', 'gbk') as csvfile:
+    with codecs.open(file_name, 'a+', 'utf_8_sig') as csvfile:
         filenames = ['用户ID', '昵称', '评论内容', '点赞数']
         writer = csv.DictWriter(csvfile, fieldnames=filenames)
 
@@ -76,7 +80,7 @@ def write_to_file(data_list):
                     filenames[2]: data['content'],
                     filenames[3]: data['likedCount']
                 })
-            except UnicodeDecodeError:
+            except UnicodeEncodeError:
                 print("编码错误，该数据无法写到文件中，直接忽略该数据")
 
     print('成功将数据写入到 ' + file_name + ' 中！')
@@ -86,9 +90,9 @@ def main():
     songs_url_list = [
         'http://music.163.com/#/song?id=479408220',  # 凉凉
         'http://music.163.com/#/song?id=31445772',  # 理想三旬
-        'http://music.163.com/#/song?id=5308076',  # 关键词
+        'http://music.163.com/#/song?id=40147554',  # 关键词
         'http://music.163.com/#/song?id=64634',  # 一丝不挂
-        'http://music.163.com/#/song?id=58939',  # 沙龙
+        'http://music.163.com/#/song?id=64833',  # 沙龙
         'http://music.163.com/#/song?id=34380998',  # 差三岁
         'http://music.163.com/#/song?id=468517654',  # 动物世界
         'http://music.163.com/#/song?id=466122271',  # 高尚
@@ -98,7 +102,9 @@ def main():
 
     for each in songs_url_list:
         start_spider(get_song_id(each))
-        time.sleep(random.randint(5, 8))
+        time.sleep(random.uniform(5, 10))
+
+    print('\n\nURL 列表中的所有歌曲的精彩评论已全部抓取完成！')
 
 
 if __name__ == '__main__':
